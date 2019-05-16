@@ -21,14 +21,15 @@ let vip = [
     }
 ]
 
-let numUsers = 0 //num user connected
+let numUsers = 0, //num user connected
+    players = {};
 
 io.on('connection', function (socket) {
 
     let player = {
         id: "",
         nickName: "",
-        character: { nameCharacter: "", photoCharacter: "" },
+        character: {},
     }
 
     console.log('an user connected'); // user connected
@@ -38,20 +39,20 @@ io.on('connection', function (socket) {
         console.log('user disconnected numUser: ' + numUsers);
     });
 
-    socket.on('login', function (inputName) { // on login
+    socket.on('login', function (input) { // on login
         numUsers++;
         console.log('user connected numUser: ' + numUsers);
-        player.nickName = inputName
-        player.character = vip[Math.floor(Math.random() * (+vip.length - +0)) + +0].name
+        player.nickName = input.nickName;
+        player.character = vip[Math.floor(Math.random() * (+vip.length - +0)) + +0]
         player.id = socket.id;
-        socket.broadcast.emit('login', player)
-        console.log(player.id)
-        console.log(player.character)
+        players[player.nickName] = player;
+        socket.broadcast.emit('login', player) //emit to everyone except me
+        socket.emit('login', { id: player.id, nickName: player.nickName }) //emit only for me
     });
 
     socket.on('chat message', function (msg) { // on message
-        console.log('message: ' + msg);
-        io.emit('chat message', msg);
+        socket.broadcast.emit('chat message', { nickName: player.nickName, message: msg.message, character: players[player.nickName].character })
+        socket.emit('chat message', { nickName: player.nickName, message: msg.message })
     });
 });
 
