@@ -58,7 +58,8 @@
     $(function () {
         var socket = io(),
             nickName = "",
-            id = "";
+            id = ""
+
         $('.nicknameForm').submit(function (e) {
             e.preventDefault(); // prevents page reloading
             socket.emit('login', { nickName: $('#nicknameInput').val() });

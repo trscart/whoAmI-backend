@@ -8,11 +8,11 @@ app.get('/', function (req, res) {
 
 let vip = [
     {
-        name: "Floyd Mayweather", 
+        name: "Floyd Mayweather",
         photo: "https://specials-images.forbesimg.com/imageserve/5b149bb84bbe6f74868b761f/416x416.jpg?background=000000&cropX1=268&cropX2=2355&cropY1=234&cropY2=2323"
     },
     {
-        name: "George Clooney", 
+        name: "George Clooney",
         photo: "https://specials-images.forbesimg.com/imageserve/5b43ae4b31358e2c990e9203/416x416.jpg?background=000000&cropX1=403&cropX2=2584&cropY1=60&cropY2=2242"
     },
     {
@@ -35,7 +35,7 @@ io.on('connection', function (socket) {
     console.log('an user connected'); // user connected
 
     socket.on('disconnect', function () { // user disconnected 
-        if(numUsers > 0){socket.id = numUsers--} // user cannot go under 0
+        if (numUsers > 0) { socket.id = numUsers-- } // user cannot go under 0
         console.log('user disconnected numUser: ' + numUsers);
     });
 
@@ -51,8 +51,13 @@ io.on('connection', function (socket) {
     });
 
     socket.on('chat message', function (msg) { // on message
-        socket.broadcast.emit('chat message', { nickName: player.nickName, message: msg.message, character: players[player.nickName].character })
-        socket.emit('chat message', { nickName: player.nickName, message: msg.message })
+        if (msg.message == players[player.nickName].character.name) {
+            socket.broadcast.emit('chat message', { nickName: player.nickName, message: "ha vinto", character: players[player.nickName].character })
+            socket.emit('chat message', { nickName: player.nickName, message: "ha vinto" })
+        } else {
+            socket.broadcast.emit('chat message', { nickName: player.nickName, message: msg.message, character: players[player.nickName].character })
+            socket.emit('chat message', { nickName: player.nickName, message: msg.message })
+        }
     });
 });
 
