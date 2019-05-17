@@ -55,14 +55,32 @@ io.on('connection', function (socket) {
             numUsers--;
         }
         console.log('user connected numUser: ' + numUsers);
-        io.emit('ready', numUsers)
+        if (numUsers == 4) {
+            io.emit('ready', "start")
+        }
     })
 
     socket.on('chat message', function (msg) { // on message
-        if (msg.message.toUpperCase() == players[player.nickName].character.name.toUpperCase()) { //if message is equal to the character's name of the player, he win
-            socket.broadcast.emit('chat message', { nickName: player.nickName, message: "ha vinto", character: players[player.nickName].character })
-            socket.emit('chat message', { nickName: player.nickName, message: "ha vinto" })
-        } else {
+
+        let myNickName = player.nickName;
+
+        let isASuggestion = Object
+            .values(players)
+            .filter((player) => player.nickName.toUpperCase() !== myNickName.toUpperCase())
+            .filter((player) => player.character.name.toUpperCase() === msg.message.toUpperCase())
+            .length;
+
+        let isWinner = player.character.name === msg.message;
+
+        if (isASuggestion) {
+            socket.emit('chat message', { nickName: player.nickName, message: "warning", character: players[player.nickName].character })
+        }
+
+        if (!isASuggestion && isWinner) {
+            io.emit('chat message', { nickName: player.nickName, message: "ha vinto", character: players[player.nickName].character })
+        }
+
+        if (!isASuggestion && !isWinner) {
             socket.broadcast.emit('chat message', { nickName: player.nickName, message: msg.message, character: players[player.nickName].character })
             socket.emit('chat message', { nickName: player.nickName, message: msg.message })
         }

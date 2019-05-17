@@ -56,6 +56,7 @@
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
     $(function () {
+
         var socket = io(),
             nickName = "",
             id = "",
@@ -63,10 +64,12 @@
 
         $('.nicknameForm').submit(function (e) {
             e.preventDefault(); // prevents page reloading
-            socket.emit('login', { nickName: $('#nicknameInput').val()});
+            nickName = $('#nicknameInput').val()
+            socket.emit('login', { nickName: nickName });
             $('#nicknameInput').val('');
             return false;
         });
+
         $('#readyBtn').click(function (e) {
             if(!btnState){ // if btnState is false
                 btnState = true
@@ -77,24 +80,27 @@
             socket.emit('ready', {readyState: btnState});
             return false;
         });
+
         $('.messageForm').submit(function (e) {
             e.preventDefault(); // prevents page reloading
-            socket.emit('chat message', { nickName: "", message: $('#messageInput').val() });
+            socket.emit('chat message', { nickName: nickName, message: $('#messageInput').val() });
             $('#messageInput').val('');
             return false;
         });
+
         socket.on('login', function (data) {
             console.log(data)
-            nickName = data.nickName
             id = data.id
             $('#messages').append($('<li>').text(data.nickName + " has joined!"));
             if (data.character) {
                 $('#messages').append($('<li>').text(data.nickName + " is " + data.character.name));
             }
         });
+
         socket.on('ready', function (data) {
             console.log(data)
         });
+        
         socket.on('chat message', function (msg) {
             console.log(msg.nickName)
             if (msg.character) {
