@@ -35,13 +35,11 @@ io.on('connection', function (socket) {
     console.log('an user connected'); // user connected
 
     socket.on('disconnect', function () { // user disconnected 
-        if (numUsers > 0) { socket.id = numUsers-- } // user cannot go under 0
+        if (numUsers > 0) { numUsers-- } // user cannot go under 0
         console.log('user disconnected numUser: ' + numUsers);
     });
 
     socket.on('login', function (input) { // on login
-        numUsers++;
-        console.log('user connected numUser: ' + numUsers);
         player.nickName = input.nickName;
         player.character = vip[Math.floor(Math.random() * (+vip.length - +0)) + +0]
         player.id = socket.id;
@@ -50,8 +48,18 @@ io.on('connection', function (socket) {
         socket.emit('login', { id: player.id, nickName: player.nickName }) //emit only for me
     });
 
+    socket.on('ready', function (state) {
+        if (state.readyState && numUsers >= 0) {
+            numUsers++;
+        } else if (!state.readyState && numUsers > 0) {
+            numUsers--;
+        }
+        console.log('user connected numUser: ' + numUsers);
+        io.emit('ready', numUsers)
+    })
+
     socket.on('chat message', function (msg) { // on message
-        if (msg.message.toUpperCase() == players[player.nickName].character.name.toUpperCase()) {
+        if (msg.message.toUpperCase() == players[player.nickName].character.name.toUpperCase()) { //if message is equal to the character's name of the player, he win
             socket.broadcast.emit('chat message', { nickName: player.nickName, message: "ha vinto", character: players[player.nickName].character })
             socket.emit('chat message', { nickName: player.nickName, message: "ha vinto" })
         } else {

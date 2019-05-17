@@ -58,12 +58,23 @@
     $(function () {
         var socket = io(),
             nickName = "",
-            id = ""
+            id = "",
+            btnState = false
 
         $('.nicknameForm').submit(function (e) {
             e.preventDefault(); // prevents page reloading
-            socket.emit('login', { nickName: $('#nicknameInput').val() });
+            socket.emit('login', { nickName: $('#nicknameInput').val()});
             $('#nicknameInput').val('');
+            return false;
+        });
+        $('#readyBtn').click(function (e) {
+            if(!btnState){ // if btnState is false
+                btnState = true
+            } else {
+                btnState = false
+            }
+            e.preventDefault(); // prevents page reloading
+            socket.emit('ready', {readyState: btnState});
             return false;
         });
         $('.messageForm').submit(function (e) {
@@ -81,6 +92,9 @@
                 $('#messages').append($('<li>').text(data.nickName + " is " + data.character.name));
             }
         });
+        socket.on('ready', function (data) {
+            console.log(data)
+        });
         socket.on('chat message', function (msg) {
             console.log(msg.nickName)
             if (msg.character) {
@@ -95,8 +109,9 @@
 <body>
     <form action="" class="nicknameForm" style="margin-bottom: 50px">
         <input id="nicknameInput" autocomplete="off" />
-        <button>Send</button>
+        <button>Login</button>
     </form>
+    <button id="readyBtn">Ready</button>
     <ul id="messages"></ul>
     <form action="" class="messageForm">
         <input id="messageInput" autocomplete="off" />
