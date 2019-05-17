@@ -51,7 +51,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('chat message', function (msg) { // on message
-        if (msg.message == players[player.nickName].character.name) {
+        if (msg.message.toUpperCase() == players[player.nickName].character.name.toUpperCase()) {
             socket.broadcast.emit('chat message', { nickName: player.nickName, message: "ha vinto", character: players[player.nickName].character })
             socket.emit('chat message', { nickName: player.nickName, message: "ha vinto" })
         } else {
